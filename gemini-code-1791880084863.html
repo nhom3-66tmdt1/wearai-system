@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WEARAI - Hệ Thống Quản Lý Tủ Đồ & Phối Đồ Thông Minh</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased">
+
+    <!-- ================= 1. MÀN HÌNH ĐĂNG NHẬP ================= -->
+    <div id="auth-screen" class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-900 via-indigo-900 to-slate-900 p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8">
+            <div class="text-center mb-8">
+                <h1 class="text-3xl font-ext500 font-bold text-indigo-600 tracking-wider">WEAR<span class="text-slate-800">AI</span></h1>
+                <p class="text-sm text-slate-500 mt-2">Hệ thống Tủ đồ số & Phối đồ thông minh AI</p>
+            </div>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Chọn vai trò đăng nhập</label>
+                    <select id="login-role" class="w-full px-4 py-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-slate-50">
+                        <option value="customer">Người dùng cá nhân (Customer)</option>
+                        <option value="partner">Đối tác nhãn hàng thời trang (Brand Partner)</option>
+                        <option value="admin">Quản trị viên hệ thống (Admin)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Email / Tên đăng nhập</label>
+                    <input type="text" id="login-username" value="user@wearai.vn" class="w-full px-4 py-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Mật khẩu</label>
+                    <input type="password" id="login-password" value="123456" class="w-full px-4 py-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                </div>
+                <button onclick="handleLogin()" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg shadow-lg transition duration-200">
+                    Đăng nhập hệ thống
+                </button>
+            </div>
+            <div class="mt-6 text-center text-xs text-slate-400">
+                &copy; 2026 WEARAI Platform - Đại học Thủy Lợi (Nhóm 3)
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= 2. MÀN HÌNH CHÍNH (DASHBOARD) ================= -->
+    <div id="main-app" class="hidden min-h-screen flex flex-col">
+        <!-- Top Navbar -->
+        <header class="bg-white border-b border-slate-200 sticky top-0 z-50">
+            <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <span class="text-2xl font-black text-indigo-600">WEAR<span class="text-slate-800">AI</span></span>
+                    <span id="role-badge" class="px-3 py-1 bg-indigo-50 text-indigo-700 text-xs font-semibold rounded-full uppercase"></span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span id="user-display-name" class="text-sm font-medium text-slate-700"></span>
+                    <button onclick="handleLogout()" class="px-3 py-1.5 border border-red-200 text-red-600 hover:bg-red-50 text-xs font-semibold rounded-lg transition">
+                        <i class="fa-solid fa-right-from-bracket mr-1"></i> Đăng xuất
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Dynamic Content Container -->
+        <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6">
+            
+            <!-- ---------------- SECTION: CUSTOMER VIEW ---------------- -->
+            <div id="view-customer" class="space-y-6 hidden">
+                <!-- Tabs navigation -->
+                <div class="flex space-x-2 border-b border-slate-200 pb-3">
+                    <button onclick="switchCustomerTab('wardrobe')" id="tab-btn-wardrobe" class="px-4 py-2 font-medium text-sm rounded-lg bg-indigo-600 text-white transition">Tủ đồ số của tôi</button>
+                    <button onclick="switchCustomerTab('stylist')" id="tab-btn-stylist" class="px-4 py-2 font-medium text-sm rounded-lg text-slate-600 hover:bg-slate-100 transition">Trợ lý phối đồ AI</button>
+                    <button onclick="switchCustomerTab('analytics')" id="tab-btn-analytics" class="px-4 py-2 font-medium text-sm rounded-lg text-slate-600 hover:bg-slate-100 transition">Phân tích khoảng trống tủ đồ</button>
+                </div>
+
+                <!-- Tab 1: Tủ đồ số -->
+                <div id="cust-tab-wardrobe" class="space-y-4">
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-xl font-bold text-slate-800">Danh mục Tủ đồ ảo (Virtual Wardrobe)</h2>
+                        <button onclick="openAddClothModal()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-lg shadow transition">
+                            <i class="fa-solid fa-plus mr-1"></i> Thêm món đồ mới
+                        </button>
+                    </div>
+                    <!-- Grid hiển thị đồ trong tủ -->
+                    <div id="wardrobe-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                        <!-- Render bằng JS -->
+                    </div>
+                </div>
+
+                <!-- Tab 2: Trợ lý phối đồ AI -->
+                <div id="cust-tab-stylist" class="space-y-6 hidden">
+                    <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                        <h3 class="text-lg font-bold text-slate-800 mb-4">Cấu hình Ngữ cảnh & Thời tiết hôm nay</h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Hoàn cảnh / Sự kiện</label>
+                                <select id="ai-occasion" class="w-full p-2.5 border rounded-lg text-sm bg-slate-50">
+                                    <option value="Đi làm công sở">Đi làm công sở (Office Casual)</option>
+                                    <option value="Đi học đại học">Đi học Đại học Thủy Lợi</option>
+                                    <option value="Đi chơi dạo phố">Đi chơi / Dạo phố cuối tuần</option>
+                                    <option value="Dự tiệc sang trọng">Dự tiệc / Sự kiện tối</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Thời tiết thực tế (GPS)</label>
+                                <input type="text" id="ai-weather" value="28°C, Nắng nhẹ, Độ ẩm 65%" readonly class="w-full p-2.5 border rounded-lg text-sm bg-slate-100 text-slate-600">
+                            </div>
+                            <div class="flex items-end">
+                                <button onclick="runAiStylist()" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg text-sm transition shadow">
+                                    <i class="fa-solid fa-wand-magic-sparkles mr-1"></i> Chạy AI Phối Outfit Trọn Bộ
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Kết quả phối đồ -->
+                    <div id="ai-result-container" class="hidden space-y-4">
+                        <h3 class="text-lg font-bold text-slate-800">Phương án phối đồ đề xuất từ AI Stylist</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="ai-outfits-list">
+                            <!-- Render kết quả AI -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab 3: Phân tích khoảng trống tủ đồ -->
+                <div id="cust-tab-analytics" class="space-y-4 hidden">
+                    <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
+                        <h3 class="text-lg font-bold text-slate-800">Báo cáo phân tích cân bằng tủ đồ & Khoảng trống</h3>
+                        <p class="text-sm text-slate-600">Thuật toán AI quét ma trận tủ đồ để phát hiện các nhóm sản phẩm bị thiếu hụt, giúp bạn định hướng mua sắm thông minh và tránh lãng phí.</p>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+                            <div class="p-4 bg-indigo-50 border border-indigo-100 rounded-lg">
+                                <span class="text-xs text-indigo-600 font-bold uppercase">Tổng số món đồ</span>
+                                <p id="stat-total-items" class="text-2xl font-black text-indigo-900 mt-1">12</p>
+                            </div>
+                            <div class="p-4 bg-emerald-50 border border-emerald-100 rounded-lg">
+                                <span class="text-xs text-emerald-600 font-bold uppercase">Chỉ số linh hoạt phối đồ</span>
+                                <p class="text-2xl font-black text-emerald-900 mt-1">78% (Khá tốt)</p>
+                            </div>
+                            <div class="p-4 bg-amber-50 border border-amber-100 rounded-lg">
+                                <span class="text-xs text-amber-600 font-bold uppercase">Khoảng trống phát hiện</span>
+                                <p class="text-2xl font-black text-amber-900 mt-1">2 Nhóm đồ thiếu</p>
+                            </div>
+                        </div>
+                        <div class="border-t pt-4">
+                            <h4 class="font-semibold text-slate-700 mb-2">Đề xuất bổ sung từ nhãn hàng đối tác (Kèm Affiliate Link):</h4>
+                            <div id="gap-recommendations" class="space-y-3">
+                                <!-- Render sản phẩm gợi ý bổ sung -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ---------------- SECTION: BRAND PARTNER VIEW ---------------- -->
+            <div id="view-partner" class="space-y-6 hidden">
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex justify-between items-center">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-800">Cổng Quản Lý Catalog & Tiếp Thị Liên Kết (Partner Portal)</h2>
+                        <p class="text-sm text-slate-500">Thương hiệu: <span class="font-semibold text-indigo-600">IVY Moda & CANIFA Official</span></p>
+                    </div>
+                    <button onclick="openAddCatalogModal()" class="px-4 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-lg shadow hover:bg-indigo-700 transition">
+                        <i class="fa-solid fa-cloud-arrow-up mr-1"></i> Nạp Catalog Sản Phẩm Mới
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                        <span class="text-xs font-semibold text-slate-400 uppercase">Tổng sản phẩm đã nạp</span>
+                        <p class="text-3xl font-black text-slate-800 mt-2">48 sản phẩm</p>
+                    </div>
+                    <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                        <span class="text-xs font-semibold text-slate-400 uppercase">Tổng lượt nhấp Affiliate (Click)</span>
+                        <p class="text-3xl font-black text-indigo-600 mt-2">1,245</p>
+                    </div>
+                    <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                        <span class="text-xs font-semibold text-slate-400 uppercase">Hoa hồng tạm tính (Tháng này)</span>
+                        <p class="text-3xl font-black text-emerald-600 mt-2">3,450,000 đ</p>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+                    <div class="px-6 py-4 border-b border-slate-200 font-bold text-slate-800">Danh mục sản phẩm kết nối AI Recommendation</div>
+                    <table class="w-full text-left border-collapse text-sm">
+                        <thead>
+                            <tr class="bg-slate-50 text-slate-600 border-b">
+                                <th class="p-4">Hình ảnh</th>
+                                <th class="p-4">Tên sản phẩm</th>
+                                <th class="p-4">Danh mục</th>
+                                <th class="p-4">Giá bán</th>
+                                <th class="p-4">Tỷ lệ hoa hồng</th>
+                                <th class="p-4">Trạng thái Affiliate Link</th>
+                            </tr>
+                        </thead>
+                        <tbody id="partner-catalog-table" class="divide-y divide-slate-100">
+                            <!-- Render bằng JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ---------------- SECTION: ADMIN VIEW ---------------- -->
+            <div id="view-admin" class="space-y-6 hidden">
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                    <h2 class="text-xl font-bold text-slate-800">Trang Quản Trị Hệ Thống (CMS Admin Backend)</h2>
+                    <p class="text-sm text-slate-500">Giám sát hạ tầng Akash Network, phân quyền người dùng và đối soát doanh thu hoa hồng.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                        <span class="text-xs font-bold text-slate-400 uppercase">Tổng tài khoản</span>
+                        <p class="text-2xl font-black text-slate-800 mt-1">1,280</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                        <span class="text-xs font-bold text-slate-400 uppercase">Nhãn hàng đối tác</span>
+                        <p class="text-2xl font-black text-indigo-600 mt-1">8 Thương hiệu</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                        <span class="text-xs font-bold text-slate-400 uppercase">Hạ tầng Akash GPU</span>
+                        <p class="text-2xl font-black text-emerald-600 mt-1">Đang hoạt động (Ổn định)</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                        <span class="text-xs font-bold text-slate-400 uppercase">Tổng hoa hồng hệ thống</span>
+                        <p class="text-2xl font-black text-indigo-900 mt-1">15,820,000 đ</p>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+                    <div class="px-6 py-4 border-b border-slate-200 font-bold text-slate-800">Quản lý Tài khoản Người dùng hệ thống</div>
+                    <table class="w-full text-left border-collapse text-sm">
+                        <thead>
+                            <tr class="bg-slate-50 text-slate-600 border-b">
+                                <th class="p-4">Họ và tên</th>
+                                <th class="p-4">Mã sinh viên / Tài khoản</th>
+                                <th class="p-4">Vai trò</th>
+                                <th class="p-4">Trạng thái</th>
+                                <th class="p-4">Thao tác quản trị</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            <tr>
+                                <td class="p-4 font-medium">Hoàng Anh Thư</td>
+                                <td class="p-4 text-slate-500">2454053785</td>
+                                <td class="p-4"><span class="px-2 py-1 bg-blue-50 text-blue-700 text-xs rounded font-semibold">Khách hàng</span></td>
+                                <td class="p-4"><span class="text-emerald-600 font-semibold text-xs"><i class="fa-solid fa-circle text-[8px] mr-1"></i> Hoạt động</span></td>
+                                <td class="p-4"><button onclick="alert('Đã khóa/mở khóa tài khoản thành công!')" class="text-xs text-indigo-600 hover:underline font-semibold">Khóa tài khoản</button></td>
+                            </tr>
+                            <tr>
+                                <td class="p-4 font-medium">IVY Moda Official</td>
+                                <td class="p-4 text-slate-500">partner_ivymoda</td>
+                                <td class="p-4"><span class="px-2 py-1 bg-purple-50 text-purple-700 text-xs rounded font-semibold">Đối tác nhãn hàng</span></td>
+                                <td class="p-4"><span class="text-emerald-600 font-semibold text-xs"><i class="fa-solid fa-circle text-[8px] mr-1"></i> Đã duyệt Catalog</span></td>
+                                <td class="p-4"><button onclick="alert('Đã cập nhật trạng thái đối tác!')" class="text-xs text-indigo-600 hover:underline font-semibold">Xem Catalog</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Modal Thêm món đồ mới -->
+    <div id="add-cloth-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+            <h3 class="text-lg font-bold text-slate-800">Thêm Món Đồ Mới Vào Tủ Số</h3>
+            <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">Tên món đồ</label>
+                <input type="text" id="new-item-name" placeholder="Ví dụ: Áo sơ mi trắng công sở" class="w-full p-2.5 border rounded-lg text-sm">
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">Danh mục</label>
+                <select id="new-item-category" class="w-full p-2.5 border rounded-lg text-sm bg-slate-50">
+                    <option value="Áo (Top)">Áo (Top)</option>
+                    <option value="Quần/Váy (Bottom)">Quần / Váy (Bottom)</option>
+                    <option value="Giày dép (Shoes)">Giày dép (Shoes)</option>
+                    <option value="Phụ kiện (Accessories)">Phụ kiện (Accessories)</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">Liên kết hình ảnh (URL mẫu)</label>
+                <input type="text" id="new-item-img" value="https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=300" class="w-full p-2.5 border rounded-lg text-sm">
+            </div>
+            <div class="flex justify-end space-x-2 pt-2">
+                <button onclick="closeAddClothModal()" class="px-4 py-2 border rounded-lg text-sm text-slate-600 hover:bg-slate-50">Hủy</button>
+                <button onclick="saveNewCloth()" class="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-semibold hover:bg-indigo-700">Lưu vào tủ đồ</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Logic xử lý hệ thống -->
+    <script>
+        // Dữ liệu mẫu ban đầu của tủ đồ số
+        let wardrobeData = [
+            { id: 1, name: 'Áo sơ mi trắng Oxford', cat: 'Áo (Top)', img: 'https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?w=300' },
+            { id: 2, name: 'Quần âu ống rộng đen', cat: 'Quần/Váy (Bottom)', img: 'https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?w=300' },
+            { id: 3, name: 'Giày Sneaker trắng Basic', cat: 'Giày dép (Shoes)', img: 'https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=300' },
+            { id: 4, name: 'Áo blazer kẻ sườn', cat: 'Áo (Top)', img: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300' }
+        ];
+
+        // Dữ liệu catalog sản phẩm đối tác & Affiliate link
+        let partnerCatalog = [
+            { id: 101, name: 'Túi xách da nữ cao cấp IVY', cat: 'Phụ kiện', price: '850,000 đ', commission: '10%', link: 'https://ivymoda.com/product/tui-xach-sample?ref=wearai_aff_88', img: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=300' },
+            { id: 102, name: 'Giày Loafer công sở nữ', cat: 'Giày dép', price: '690,000 đ', commission: '12%', link: 'https://canifa.com/product/giay-loafer-sample?ref=wearai_aff_88', img: 'https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=300' }
+        ];
+
+        // Hàm xử lý đăng nhập
+        function handleLogin() {
+            const role = document.getElementById('login-role').value;
+            const username = document.getElementById('login-username').value;
+
+            document.getElementById('auth-screen').classList.add('hidden');
+            document.getElementById('main-app').classList.remove('hidden');
+
+            // Thiết lập hiển thị theo phân quyền
+            document.getElementById('view-customer').classList.add('hidden');
+            document.getElementById('view-partner').classList.add('hidden');
+            document
